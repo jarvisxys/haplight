@@ -10,7 +10,7 @@ Read `docs/STATUS.md` first, then the relevant section of
 - Commit and push at the end of each piece of work so a lost session loses nothing.
 
 ## Authorship
-- Single author for now: Aditya Kumar. Do not add other authors to the paper,
+- Single author for now: Aditya Singh. Do not add other authors to the paper,
   README, plan or citation files unless asked.
 
 ## Research rules (carried over from v2, see docs/history/)

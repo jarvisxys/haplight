@@ -4,7 +4,7 @@ Heterogeneity-aware occupancy-pressure (HAP) traffic signal control with
 certified reinforcement learning, for Indian mixed traffic. Simulated in SUMO
 with the SL2015 sublane model.
 
-Author: Aditya Kumar (RGIPT)
+Author: Aditya Singh (RGIPT)
 
 The research plan is in [docs/plan/HAPLight_v3_Research_Plan.pdf](docs/plan/HAPLight_v3_Research_Plan.pdf).
 Current progress is in [docs/STATUS.md](docs/STATUS.md).
