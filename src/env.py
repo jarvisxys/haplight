@@ -199,6 +199,9 @@ class HAPLightEnv:
         self._tc = None
         self.backend: Optional[str] = None
         self._started = False
+        # False until the first simulationStep() of the current simulation;
+        # see _measure() for why context results are ignored before that.
+        self._context_results_valid = False
         self._sim_time = 0.0
 
         # static geometry, discovered once and cached across episodes
@@ -287,6 +290,7 @@ class HAPLightEnv:
             cmd += ["--lateral-resolution", str(self.lateral_resolution_m)]
         self._traci.start(cmd)
         self._started = True
+        self._context_results_valid = False
 
         if not self._topology_ready:
             self._discover_topology()
@@ -595,6 +599,7 @@ class HAPLightEnv:
                         i, self._phase_state_string(i, final_action[i])
                     )
             traci.simulationStep()
+            self._context_results_valid = True
             self._sim_time += self.sim_step_s
             for i in elapsed_switch:
                 elapsed_switch[i] += self.sim_step_s
@@ -841,11 +846,24 @@ class HAPLightEnv:
         # Deduplicating by vehicle id makes each vehicle contribute exactly
         # once, which is what every downstream channel already assumed.
         vehicles: Dict[str, dict] = {}
-        for e in self._catchment_edges:
-            res = traci.edge.getContextSubscriptionResults(e) or {}
-            for vid, v in res.items():
-                if vid not in vehicles:
-                    vehicles[vid] = v
+        # libsumo keeps context-subscription results in a process-wide
+        # cache that survives close()+start(); subscribeContext() and
+        # unsubscribeContext() do not clear it, only simulationStep()
+        # does. Before the first step of this simulation (the reset()
+        # observation) it still holds the PREVIOUS simulation's last
+        # step. SUMO inserts no vehicles before the first step, so the
+        # correct measurement there is empty -- what TCP traci returns.
+        if self._context_results_valid:
+            for e in self._catchment_edges:
+                res = traci.edge.getContextSubscriptionResults(e) or {}
+                for vid, v in res.items():
+                    if vid not in vehicles:
+                        vehicles[vid] = v
+        elif traci.vehicle.getIDCount() != 0:
+            raise RuntimeError(
+                "vehicles present before the first simulationStep(); "
+                "the empty reset() measurement assumption no longer holds"
+            )
 
         for _vid, v in vehicles.items():
                 lane = v[tc.VAR_LANE_ID]
