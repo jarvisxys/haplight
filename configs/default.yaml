@@ -1,0 +1,310 @@
+# =============================================================================
+# HAPLight master configuration.
+#
+# RULE: every number that appears in the paper appears HERE and nowhere else
+# in the code. If a value changes, it changes in this file and scripts/report.py
+# regenerates the affected LaTeX table. Never hard-code a paper number in .py.
+#
+# Cross-references are to HAPLight_journal_v2.tex.
+# =============================================================================
+
+# --- Vehicle fleet (paper Table III) -----------------------------------------
+# a_v = (length + min_gap) * (width + min_gap_lat)   [Eq. 3]
+# pi_v = a_v / a_car        (dynamic-area equivalency)
+# beta_v = a_v / rho_hcm_v  (drives Lemma 1)
+#
+# `share` (Phase 1c, P1c-5): corrected from an earlier placeholder mix (bus
+# 10% of vehicles / 72% of passengers, making PWD a near-pure bus-delay
+# metric) to a directional Indian-metro-arterial mix: 2W 62%, car 22%,
+# auto 10%, bus 2%, truck 4% -> passenger shares 37.7/16.5/10.3/32.7/2.8%.
+# STILL NOT CITED -- needs a household travel survey or municipal classified
+# count before Sec. VII calls it representative (PAPER_CHANGELOG P1c-5).
+fleet:
+  classes:
+    - {name: twowheeler, sumo_class: motorcycle,
+       length: 1.90,  width: 0.70, min_gap: 1.00, min_gap_lat: 0.20,
+       max_speed_kmh: 60, accel: 2.5, decel: 4.5,
+       rho_hcm: 0.5, share: 0.62, occupancy: 1.3}
+    - {name: car, sumo_class: passenger,
+       length: 3.70,  width: 1.60, min_gap: 1.50, min_gap_lat: 0.60,
+       max_speed_kmh: 70, accel: 2.0, decel: 4.0,
+       rho_hcm: 1.0, share: 0.22, occupancy: 1.6}
+    - {name: auto, sumo_class: passenger,
+       length: 2.60,  width: 1.40, min_gap: 1.20, min_gap_lat: 0.40,
+       max_speed_kmh: 45, accel: 1.5, decel: 3.5,
+       rho_hcm: 1.2, share: 0.10, occupancy: 2.2}
+    - {name: bus, sumo_class: bus,
+       length: 10.50, width: 2.50, min_gap: 2.00, min_gap_lat: 0.80,
+       max_speed_kmh: 50, accel: 1.0, decel: 3.0,
+       rho_hcm: 3.0, share: 0.02, occupancy: 35.0}
+    - {name: truck, sumo_class: truck,
+       length: 7.50,  width: 2.50, min_gap: 2.00, min_gap_lat: 0.80,
+       max_speed_kmh: 50, accel: 1.0, decel: 3.0,
+       rho_hcm: 3.5, share: 0.04, occupancy: 1.5}
+
+  # Active space-equivalency weight vector: "area" (pi_v) or "hcm" (rho_hcm_v).
+  #
+  # DEFAULT = "hcm", set by MEASUREMENT (calibrate.py, re-run 2026-08-09
+  # under the Phase 1c fleet mix above -- supersedes the 2026-08-08 numbers,
+  # which were measured under the earlier bus-heavy mix):
+  #   criterion              Indo-HCM   dynamic area
+  #   eps (Lemma 1, calib.)    0.078       0.000
+  #   nu  (A5 violation)       0.027       0.113
+  #   total ~ c*(eps + nu)     0.105       0.113   <- HCM still wins, narrowly
+  # The margin shrank a lot (was 0.083 vs 0.122, ~33%; now 0.105 vs 0.113,
+  # ~7%) once the fleet went 2W-heavy -- less bus/truck skew means less for
+  # BOTH estimators to get wrong, and it costs the HCM side proportionally
+  # more because two-wheelers are exactly the class its DISCHARGE-cost
+  # argument is about. Static footprint still understates two-wheeler
+  # discharge cost: they pack laterally in the queue but still need
+  # longitudinal time headway. The fitted discharge-equivalency for 2W is
+  # now 0.491 (was 0.463), even closer to Indo-HCM's 0.5 and still far from
+  # the area value 0.228.
+  weight_scheme: hcm
+
+  # Calibration constant a_bar for the area estimator, m^2 per weight-unit.
+  # Calibrated to the REALISED composition (C1), not the minimax a_bar* of
+  # Lemma 1: the resulting uniform offset is free by Remark 3, so only the
+  # residual dispersion is charged. null -> fall back to minimax a_bar*.
+  #   hcm : minimax 9.485 -> calibrated 7.686   (eps 0.211 -> 0.078)
+  #     (was calibrated 9.986 under the pre-Phase-1c bus-heavy fleet mix --
+  #     moves DOWN because two-wheelers, now 62% of the fleet, have the
+  #     lowest beta_v (5.22) of any class, pulling the realised-composition
+  #     mean below the old bus/truck-influenced value.)
+  #   area: exact by construction, no calibration needed
+  a_bar_calibrated:
+    hcm: 7.686
+    area: null
+
+  # Sublane behaviour (paper Table IV). Two-wheelers may sit anywhere laterally.
+  lat_alignment: {twowheeler: arbitrary, auto: arbitrary,
+                  car: center, bus: center, truck: center}
+  lc_sublane:    {twowheeler: 1.0, auto: 0.8, car: 0.3, bus: 0.1, truck: 0.1}
+
+# --- Signal timing (paper Table IV) ------------------------------------------
+signal:
+  sim_step_s: 1.0
+  decision_interval_s: 5.0     # Delta t
+  min_green_s: 10.0            # g_min
+  max_green_s: 120.0           # g_max  (anti-starvation bound)
+  yellow_s: 3.0                # t_y = yellow + all_red
+  all_red_s: 2.0
+  lateral_resolution_m: 0.8
+
+# --- HAP measure -------------------------------------------------------------
+hap:
+  stop_speed_threshold_ms: 0.5   # below this a vehicle counts as queued
+  catchment_length_m: 200.0      # upstream detection zone per movement
+  running_horizon_s: 5.0         # for u_hat: reachable within one Delta t
+  # mu_m (saturation flow, weight-units/s) from Indo-HCM as a function of
+  # effective approach width w_eff (m). Linear fit used by controllers.
+  saturation_flow:
+    per_metre_width: 0.55        # weight-units / s / m   [CALIBRATE in C2]
+    min_mu: 0.4
+    max_mu: 3.0
+  # Phase 1c (P1c-4): a movement counts as "near-spillback" once its queue
+  # reaches this fraction of env.storage (metrics.spillback_stats). 100% of
+  # storage = the queue has physically reached the upstream intersection.
+  spillback_threshold: 0.90
+  # Storage-aware HAP (PAPER_CHANGELOG P4c-1): headroom fraction below which
+  # a movement's effective saturation flow starts being throttled toward its
+  # downstream link's remaining physical capacity. 1.0 = fully throttled
+  # (plain HAP); not tuned to force a result -- swept empirically.
+  storage_aware_theta: 0.15
+
+# --- Sensing noise model (paper Sec. V-E) ------------------------------------
+sensing:
+  theta_max: 0.50    # misclassification strength at eta=1
+  q_max: 0.35        # detection dropout probability at eta=1
+  sigma_max: 0.30    # lognormal area-noise sigma at eta=1
+  bias_max: 0.10     # per-movement per-episode catchment bias at eta=1
+  # Size ordering used to build the confusion kernel U (size-adjacent classes).
+  size_order: [twowheeler, auto, car, truck, bus]
+  train_eta_range: [0.0, 0.6]
+  eval_eta_grid: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
+
+# --- RL (paper Table VI) -----------------------------------------------------
+rl:
+  obs:
+    x_ref: 50.0        # weight-units, FIXED (not a running statistic)
+    mu_ref: 1.0        # weight-units/s
+    clip: 10.0
+    n_neighbours: 4
+  net:
+    movement_in_dim: 8
+    movement_hidden: 64
+    phase_hidden: 64
+    neighbour_hidden: 32
+    competition_hidden: 32
+    expected_param_count: 23650   # tests/test_policy.py asserts this exactly
+  ppo:
+    lr: 3.0e-4
+    lr_schedule: linear
+    clip: 0.2
+    epochs: 4
+    minibatch: 512
+    gamma: 0.99
+    gae_lambda: 0.95
+    entropy_coef: 0.01
+    value_coef: 0.5
+    grad_clip: 0.5
+    iterations: 100          # N_it
+    parallel_episodes: 8     # E  -> 800 episodes per run
+  reward:
+    c_switch: 0.05
+    form: total_queue   # pressure_all | total_queue | served_pressure -- total_queue validated by
+                         # scripts/validate_reward.py (PAPER_CHANGELOG P4-3/P4-4); pressure_all (old
+                         # Eq. 12) is actively wrong-signed, do not revert without re-validating
+  filter:
+    threshold_percentile: 90   # B = P90 of greedy-HAP movement queue mass
+    sensitivity_percentiles: [75, 90, 97]
+    # PAPER_CHANGELOG P4c-4: second, independent trigger (OR'd with the
+    # queue-magnitude one) -- fires once any movement's SENSED occupancy
+    # (x_hat, movement-resolution) crosses this fraction of its own
+    # env.storage capacity.
+    # VALUE HISTORY: 0.85 (P4c-9/P4c-12) was chosen from a sweep later found
+    # to have a multiprocessing bug (P4c-14: Pool worker reuse let one
+    # trial's outcome depend on what ran earlier in the same worker
+    # process). Re-run with the bug fixed (maxtasksperchild=1, fresh
+    # process per trial), cross-checked via an independent standalone
+    # code path: 0.80 is the ONLY threshold with zero failures across all
+    # 40 tested (seed, scenario, eta) conditions -- 0.85 has 3. Not tuned
+    # to force this result; it is what survived re-validation.
+    # PAPER_CHANGELOG P5-2: RE-SWEPT on corrected measurements. The old
+    # 0.80 was selected against 8x-inflated occupancies; post-fix the real
+    # occupancy distribution maxes out at ~0.40 (S1 p99=0.217, S2
+    # p99=0.142), so 0.80 was structurally incapable of ever firing.
+    # Re-sweep (8 seeds x 6 thresholds x both scenarios, random-init
+    # policy as the worst-case driver, hysteresis, maxtasksperchild=1):
+    # 0.15 is deadlock-free on both scenarios (0/16) AND is the only
+    # level where the storage trigger measurably contributes on both
+    # (S1 27.0% vs the 22% queue-magnitude floor; S2 24.9% vs 22.1%).
+    # At >=0.25 the trigger is inert on S2 -- 0.25/0.30/0.40 produce
+    # byte-identical results, the same failure mode as 0.80.
+    storage_trigger_threshold: 0.15
+    # PAPER_CHANGELOG P4c-11: hysteresis release threshold (must be < the
+    # engage threshold above) + minimum engagement dwell -- a naive single
+    # threshold chatters (confirmed: one intersection toggled 84 times in
+    # 720 decisions), which is what made P4c-10's sweep non-monotonic in
+    # the threshold. Defaults are round numbers, not fit to the sweep.
+    storage_trigger_threshold_low: 0.10   # P5-2: 0.05 hysteresis gap below engage
+    min_dwell_decisions: 3
+
+# --- RL baselines (Phase 5, PAPER_CHANGELOG P5-1) ----------------------------
+# One sub-block per baseline: its own `net` (fed into the SAME HAPLightPolicy
+# class as rl.net -- it's fully config-driven, see src/policy.py) and its own
+# `obs` (x_ref/clip/n_neighbours -- most literature baselines here are
+# decentralised, n_neighbours=0). Widths NOT independently verified against
+# each source paper's own published architecture table -- inferred, modest
+# defaults matching this project's own scale, documented per PAPER_CHANGELOG
+# P5-1, not silently presented as transcribed literature constants.
+rl_baselines:
+  advanced_mplight:
+    obs:
+      x_ref: 50.0
+      clip: 10.0
+      n_neighbours: 0    # decentralised (Zhang et al. 2022) -- no neighbour term
+    net:
+      movement_in_dim: 2   # [efficient pressure, running demand] -- see src/rl_baselines.py
+      movement_hidden: 32
+      phase_hidden: 32
+      neighbour_hidden: 4  # unused (n_neighbours=0); kept >0 only because nn.Linear needs out_features>=1
+      competition_hidden: 16
+    reward_form: pressure_raw
+  mplight:
+    obs:
+      x_ref: 50.0
+      clip: 10.0
+      n_neighbours: 0    # decentralised (Chen et al. 2020) -- no neighbour term
+    net:
+      movement_in_dim: 1   # pressure only -- see src/rl_baselines.py::build_state_mplight
+      movement_hidden: 16
+      phase_hidden: 16
+      neighbour_hidden: 4
+      competition_hidden: 8
+    reward_form: pressure_raw   # shared with advanced_mplight, validated once (PAPER_CHANGELOG P5-1)
+  presslight:
+    obs:
+      x_ref: 50.0
+      clip: 10.0
+      n_neighbours: 0
+    net:
+      movement_in_dim: 2   # [x_up, x_down], raw counts -- see src/rl_baselines.py::build_state_presslight
+      movement_hidden: 16
+      phase_hidden: 16
+      neighbour_hidden: 4
+      competition_hidden: 8
+    reward_form: pressure_raw   # PressLight originated pressure-as-reward; shared, already validated
+  colight:
+    obs:
+      x_ref: 50.0
+      clip: 10.0
+      n_neighbours: 4   # REAL graph neighbours (env._neighbours) -- CoLight's whole point, unlike the other four
+    net:
+      movement_in_dim: 2   # [x_up, x_down], same local features as presslight
+      movement_hidden: 16  # also the attention embedding width (src/rl_baselines.py::CoLightPolicy)
+      phase_hidden: 16
+      competition_hidden: 8
+    reward_form: total_queue   # published CoLight reward is queue-based; reuses HAPLight's own validated
+                                # total_queue form rather than adding a third new form (PAPER_CHANGELOG P5-1)
+
+# --- Scenarios (paper Sec. VI-C) ---------------------------------------------
+scenarios:
+  s1_arterial:
+    n_intersections: 5
+    spacing_m: 400
+  s2_grid:
+    rows: 4
+    cols: 4
+    spacing_m: 300
+  s3_bengaluru:
+    bbox: [77.67, 12.99, 77.80, 13.08]   # min_lon, min_lat, max_lon, max_lat
+    netconvert_flags: ["--junctions.join", "--tls.guess-signals", "--tls.join"]
+
+# --- Demand ------------------------------------------------------------------
+demand:
+  episode_length_s: 3600
+  profile: two_peak
+  surge:
+    start_s: 1800
+    duration_s: 900
+    multiplier: 2.0
+  composition_sensitivity_2w_delta: [-0.10, 0.0, 0.10]
+
+  # Phase 1b: per-OD class-share interpolation (scripts/build_nets.py
+  # LOCAL_ARCHETYPE/ARTERIAL_ARCHETYPE). 0 = every OD gets the fleet's
+  # nominal (uniform) shares above -- Phase 1's behaviour, byte-identical.
+  # 1 = full heterogeneous archetype. Not a cited value, directional only.
+  composition_dispersion: 0.5
+
+  # Filled by scripts/calibrate_demand.py (capacity sweep under GreedyHAP).
+  # null until calibration has run; scripts/build_nets.py falls back to a
+  # demand_scale of 1.0 with a printed note if so.
+  scale_nominal: {s1_arterial: 1.1758, s2_grid: 1.2875}       # v/c ~ 0.85
+  scale_surge: {s1_arterial: 1.4524, s2_grid: 1.5904}          # v/c ~ 1.05 (surge test)
+  capacity_veh_per_h: {s1_arterial: 4481.7778, s2_grid: 6543.3333}   # measured throughput plateau
+
+# --- Evaluation protocol (paper Table IV, Table VII) -------------------------
+evaluation:
+  seeds: [0, 1, 2, 3, 4]
+  main_episodes_per_seed: 30
+  robustness_episodes_per_seed: 20
+  mpe_att_relative: 0.02    # pre-registered minimum practically relevant effect
+  mpe_aql_relative: 0.05
+  alpha: 0.05
+  bootstrap_resamples: 10000
+
+# --- Sensitivity sweeps (paper Sec. VII-H) -----------------------------------
+sensitivity:
+  c_switch: [0.0, 0.02, 0.05, 0.1, 0.2]
+  filter_percentile: [75, 90, 97]
+  equivalency_perturbation: [-0.20, 0.0, 0.20]
+  decision_interval_s: [5, 10]
+  bus_occupancy: [25, 40]
+
+# --- Baselines (paper Sec. VI-E) ---------------------------------------------
+baselines:
+  classical: [ft, sotl, mp, efficient_mp, advanced_mp, greedy_hap]
+  learned:   [ippo, presslight, mplight, colight, advanced_mplight, marddpg]
+  # Declared a priori: S3 trains only this subset (compute budget, Sec. VI-G).
+  learned_s3: [ippo, mplight, advanced_mplight, haplight_rl]

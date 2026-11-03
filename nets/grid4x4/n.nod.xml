@@ -1,0 +1,34 @@
+<nodes>
+  <node id="n0_0" x="0.0" y="0.0" type="traffic_light"/>
+  <node id="n0_1" x="300.0" y="0.0" type="traffic_light"/>
+  <node id="n0_2" x="600.0" y="0.0" type="traffic_light"/>
+  <node id="n0_3" x="900.0" y="0.0" type="traffic_light"/>
+  <node id="n1_0" x="0.0" y="-300.0" type="traffic_light"/>
+  <node id="n1_1" x="300.0" y="-300.0" type="traffic_light"/>
+  <node id="n1_2" x="600.0" y="-300.0" type="traffic_light"/>
+  <node id="n1_3" x="900.0" y="-300.0" type="traffic_light"/>
+  <node id="n2_0" x="0.0" y="-600.0" type="traffic_light"/>
+  <node id="n2_1" x="300.0" y="-600.0" type="traffic_light"/>
+  <node id="n2_2" x="600.0" y="-600.0" type="traffic_light"/>
+  <node id="n2_3" x="900.0" y="-600.0" type="traffic_light"/>
+  <node id="n3_0" x="0.0" y="-900.0" type="traffic_light"/>
+  <node id="n3_1" x="300.0" y="-900.0" type="traffic_light"/>
+  <node id="n3_2" x="600.0" y="-900.0" type="traffic_light"/>
+  <node id="n3_3" x="900.0" y="-900.0" type="traffic_light"/>
+  <node id="stub0" x="-300.0" y="0.0" type="priority"/>
+  <node id="stub1" x="0.0" y="300.0" type="priority"/>
+  <node id="stub2" x="300.0" y="300.0" type="priority"/>
+  <node id="stub3" x="600.0" y="300.0" type="priority"/>
+  <node id="stub4" x="1200.0" y="0.0" type="priority"/>
+  <node id="stub5" x="900.0" y="300.0" type="priority"/>
+  <node id="stub6" x="-300.0" y="-300.0" type="priority"/>
+  <node id="stub7" x="1200.0" y="-300.0" type="priority"/>
+  <node id="stub8" x="-300.0" y="-600.0" type="priority"/>
+  <node id="stub9" x="1200.0" y="-600.0" type="priority"/>
+  <node id="stub10" x="-300.0" y="-900.0" type="priority"/>
+  <node id="stub11" x="0.0" y="-1200.0" type="priority"/>
+  <node id="stub12" x="300.0" y="-1200.0" type="priority"/>
+  <node id="stub13" x="600.0" y="-1200.0" type="priority"/>
+  <node id="stub14" x="1200.0" y="-900.0" type="priority"/>
+  <node id="stub15" x="900.0" y="-1200.0" type="priority"/>
+</nodes>

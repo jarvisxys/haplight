@@ -1,0 +1,158 @@
+[
+  {
+    "entry": "stub0_n0_0",
+    "exit": "n0_2_stub6",
+    "path_length_intersections": 3,
+    "arterial_fraction": 0.0,
+    "shares": {
+      "twowheeler": 0.6599999999999999,
+      "car": 0.21000000000000002,
+      "auto": 0.09,
+      "bus": 0.015,
+      "truck": 0.025
+    }
+  },
+  {
+    "entry": "stub1_n0_0",
+    "exit": "n0_3_stub7",
+    "path_length_intersections": 4,
+    "arterial_fraction": 1.0,
+    "shares": {
+      "twowheeler": 0.385,
+      "car": 0.335,
+      "auto": 0.09,
+      "bus": 0.11,
+      "truck": 0.08
+    }
+  },
+  {
+    "entry": "stub2_n0_0",
+    "exit": "n0_3_stub8",
+    "path_length_intersections": 4,
+    "arterial_fraction": 1.0,
+    "shares": {
+      "twowheeler": 0.385,
+      "car": 0.335,
+      "auto": 0.09,
+      "bus": 0.11,
+      "truck": 0.08
+    }
+  },
+  {
+    "entry": "stub3_n0_1",
+    "exit": "n0_4_stub9",
+    "path_length_intersections": 4,
+    "arterial_fraction": 1.0,
+    "shares": {
+      "twowheeler": 0.385,
+      "car": 0.335,
+      "auto": 0.09,
+      "bus": 0.11,
+      "truck": 0.08
+    }
+  },
+  {
+    "entry": "stub4_n0_1",
+    "exit": "n0_4_stub10",
+    "path_length_intersections": 4,
+    "arterial_fraction": 1.0,
+    "shares": {
+      "twowheeler": 0.385,
+      "car": 0.335,
+      "auto": 0.09,
+      "bus": 0.11,
+      "truck": 0.08
+    }
+  },
+  {
+    "entry": "stub5_n0_2",
+    "exit": "n0_4_stub11",
+    "path_length_intersections": 3,
+    "arterial_fraction": 0.0,
+    "shares": {
+      "twowheeler": 0.6599999999999999,
+      "car": 0.21000000000000002,
+      "auto": 0.09,
+      "bus": 0.015,
+      "truck": 0.025
+    }
+  },
+  {
+    "entry": "stub6_n0_2",
+    "exit": "n0_0_stub0",
+    "path_length_intersections": 3,
+    "arterial_fraction": 0.0,
+    "shares": {
+      "twowheeler": 0.6599999999999999,
+      "car": 0.21000000000000002,
+      "auto": 0.09,
+      "bus": 0.015,
+      "truck": 0.025
+    }
+  },
+  {
+    "entry": "stub7_n0_3",
+    "exit": "n0_0_stub1",
+    "path_length_intersections": 4,
+    "arterial_fraction": 1.0,
+    "shares": {
+      "twowheeler": 0.385,
+      "car": 0.335,
+      "auto": 0.09,
+      "bus": 0.11,
+      "truck": 0.08
+    }
+  },
+  {
+    "entry": "stub8_n0_3",
+    "exit": "n0_0_stub2",
+    "path_length_intersections": 4,
+    "arterial_fraction": 1.0,
+    "shares": {
+      "twowheeler": 0.385,
+      "car": 0.335,
+      "auto": 0.09,
+      "bus": 0.11,
+      "truck": 0.08
+    }
+  },
+  {
+    "entry": "stub9_n0_4",
+    "exit": "n0_1_stub3",
+    "path_length_intersections": 4,
+    "arterial_fraction": 1.0,
+    "shares": {
+      "twowheeler": 0.385,
+      "car": 0.335,
+      "auto": 0.09,
+      "bus": 0.11,
+      "truck": 0.08
+    }
+  },
+  {
+    "entry": "stub10_n0_4",
+    "exit": "n0_1_stub4",
+    "path_length_intersections": 4,
+    "arterial_fraction": 1.0,
+    "shares": {
+      "twowheeler": 0.385,
+      "car": 0.335,
+      "auto": 0.09,
+      "bus": 0.11,
+      "truck": 0.08
+    }
+  },
+  {
+    "entry": "stub11_n0_4",
+    "exit": "n0_2_stub5",
+    "path_length_intersections": 3,
+    "arterial_fraction": 0.0,
+    "shares": {
+      "twowheeler": 0.6599999999999999,
+      "car": 0.21000000000000002,
+      "auto": 0.09,
+      "bus": 0.015,
+      "truck": 0.025
+    }
+  }
+]
