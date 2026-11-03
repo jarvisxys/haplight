@@ -1,0 +1,40 @@
+[project]
+name = "haplight"
+version = "0.3.0.dev0"
+description = "Heterogeneity-aware occupancy-pressure traffic signal control with certified reinforcement learning"
+readme = "README.md"
+authors = [{ name = "Aditya Kumar" }]
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    # SUMO pinned: sublane (SL2015) behaviour changes across releases and every
+    # number in the paper is conditional on this version. All four must match.
+    "eclipse-sumo==1.27.1",
+    "libsumo==1.27.1",
+    "traci==1.27.1",
+    "sumolib==1.27.1",
+    "numpy>=2.1",
+    "scipy>=1.14",
+    "pandas>=2.2",
+    "pyarrow>=23,<24",  # libsumo 1.27.1 is built against libarrow 23
+    "statsmodels>=0.14",
+    "matplotlib>=3.9",
+    "pyyaml>=6.0",
+    "networkx>=3.3",
+    "psutil>=6.0",
+    "tqdm>=4.66",
+    "torch>=2.5",
+]
+
+[dependency-groups]
+dev = ["pytest>=8.3", "ruff>=0.8"]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+extend-exclude = ["docs/history"]

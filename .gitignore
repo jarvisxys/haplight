@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Run outputs live on D:\haplight-data (these two are junctions to it)
+results/
+results_baselines/
+results_*/
+*.pt
+*.parquet
+
+# Generated SUMO networks (rebuilt by scripts/build_nets.py; large)
+nets/bengaluru/*.net.xml
+nets/bengaluru/_plain*/
+nets/bengaluru/_view/
+nets/**/*.log
+
+# LaTeX build files
+*.aux
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+
+# Editors / OS
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
