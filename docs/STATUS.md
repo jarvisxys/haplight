@@ -17,7 +17,7 @@ Last updated: 2026-11-04
 - Code in `C:\dev\haplight`, data in `D:\haplight-data`, remote `github.com/jarvisxys/haplight`.
 - No RAM upgrade. Heavy compute on the college server (RTX PRO 6000 Blackwell, 96 GB).
 - Certified Action Set replaces the safety filter as the main contribution.
-- Single author (Aditya Singh) for now.
+- Single author (Aditya Kumar) for now.
 
 ## Test suite on the new environment (2026-11-04)
 - libsumo backend: 82 passed, 1 skipped (Bengaluru net moved to D:), 1 failed, in 4 min
