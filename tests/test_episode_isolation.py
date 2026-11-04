@@ -80,6 +80,7 @@ SCRIPTS_WITH_PER_EPISODE_POOLS = [
     "scripts/sweep_storage_threshold.py",
     "scripts/train.py",
     "scripts/check_greedy_reference.py",
+    "scripts/benchmark_backend.py",
 ]
 
 
