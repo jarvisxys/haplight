@@ -80,6 +80,13 @@ Last updated: 2026-11-04
   `bootstrap_sumo()` raise instead of silently falling back to traci (a `src/` change,
   not made).
 
+## Tools
+- `scripts/system_check.py` prints hardware, package versions, whether PyTorch can use
+  CUDA (laptop: no, CPU-only torch build; GTX 1650 detected but unused) and the latest
+  benchmark results. Run it first on the college server.
+- CPU training smoke test (2026-11-07, about 2 min): `uv run python -m scripts.train
+  --scenario s1 --quick --iterations 3 --n-envs 6 --out results/smoke`.
+
 ## Next steps (plan Sec. 15)
 1. ~~Fix the stale first observation after `reset()` under libsumo~~ (done 2026-11-04).
 2. ~~Backend parity test and per-episode speed benchmark~~ (done 2026-11-04).
